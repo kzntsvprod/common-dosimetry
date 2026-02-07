@@ -1,0 +1,16 @@
+# Налаштування PyCharm
+.idea/
+*.iml
+
+# Скомпільовані файли Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Віртуальне середовище
+venv/
+env/
+.env
+
+# Системні файли
+.DS_Store
