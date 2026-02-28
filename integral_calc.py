@@ -3,18 +3,13 @@ import matplotlib.pyplot as plt
 
 # Константи
 T0 = 2.5e-2
-EPSILON = 0.1
-K1 = 1e8
-K2 = 1e6
-
-# Температура
-def get_T(t):
-    return T0 + 8.6e-5 * t
+EPSILON = 1.7
+K1 = 1e13
 
 # Інтегрована функція
 def integral_func(x):
     if x == 0: return 0
-    return math.exp(-EPSILON / x)
+    return K1 * math.exp(-EPSILON / x)
 
 # Метод Сімпсона
 def simpson_rule(f, a, b, n):
@@ -31,57 +26,54 @@ def simpson_rule(f, a, b, n):
 
     return result * h / 3
 
+# Обчислення інтегралу у межах [T0, T]
+def integral(T):
+    if T > T0:
+        return simpson_rule(integral_func, T0, T, 1000)
+    else:
+        return 0
+
 # Побудова графіка
 def plot_graph():
-    t_min = 0
-    t_max = 10000
+    T_min = 1e-2
+    T_max = 0.1
 
-    t_values = []
+    T_values = []
     I_values = []
 
-    points_count = 200
-    step = (t_max - t_min) / points_count
+    step = 0.0001
 
-    current_t = t_min
-    while current_t <= t_max:
-        # Знаходження поточної температури цієї миті
-        current_T = get_T(current_t)
+    current_T = T_min
+    while current_T <= T_max:
+        # Результат інтегрування
+        integral_val = integral(current_T)
 
-        # Обчислення інтегралу у межах [T0, current_T]
-        if current_T > T0:
-            integral_val = simpson_rule(integral_func, T0, current_T, 1000)
-        else:
-            integral_val = 0
+        # Головна формула I = K1 * math.exp(-EPSILON / T) * math.exp(-integral_val)
+        I = K1 * math.exp(-EPSILON / current_T) * math.exp(-integral_val)
 
-        # Головна формула I = k1 * exp(-eps / T) * [1 + k2 * integral(exp(-eps / x))]^(-2)
-        term1 = K1 * math.exp(-EPSILON / current_T)
-        term2 = (1 + K2 * integral_val)**(-2)
-
-        I = term1 * term2
-
-        t_values.append(current_t)
+        T_values.append(current_T)
         I_values.append(I)
 
-        current_t += step
+        current_T += step
 
     # Побудова графіку
     plt.figure(figsize=(10, 6))
 
-    plt.plot(t_values, I_values, linewidth=2)
+    plt.plot(T_values, I_values, linewidth=2)
 
     # Зафарбування площі
-    plt.fill_between(t_values, I_values, color='green', alpha=0.1)
+    plt.fill_between(T_values, I_values, color='green', alpha=0.1)
 
-    plt.title(f'Залежність інтенсивності світіння від часу I(t)')
-    plt.xlabel('Час (t)')
+    plt.title(f'Залежність інтенсивності світіння від температури I(T)')
+    plt.xlabel('Температура (T)')
     plt.ylabel('Інтенсивність світіння (I)')
     plt.grid(True)
 
     # Знаходження піка графіку
     max_I = max(I_values)
-    max_t = t_values[I_values.index(max_I)]
-    plt.plot(max_t, max_I, 'ro')
-    plt.text(max_t, max_I, f' Пік: t={max_t:.1f}', verticalalignment='bottom')
+    max_T = T_values[I_values.index(max_I)]
+    plt.plot(max_T, max_I, 'ro')
+    plt.text(max_T, max_I, f' Пік: T = {max_T:.5f}', verticalalignment='bottom')
 
     plt.show()
 
