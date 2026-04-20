@@ -2,12 +2,12 @@ import math
 import matplotlib.pyplot as plt
 
 # Фізичні параметри дозиметричної моделі
-T0 = 2.5e-2
+T0 = 1.84e-2
 
 # Функція інтенсивності світіння
 def integral_func(x, k1, epsilon):
     if x == 0: return 0
-    return k1 * math.exp(-epsilon / x)
+    return math.exp(-epsilon / x)
 
 # Чисельне інтегрування методом Сімпсона
 def simpson_rule(f, a, b, n, k1, epsilon):
@@ -28,9 +28,9 @@ def integral(T, k1, epsilon):
     return 0
 
 # Алгоритм динамічного пошуку температурного піка (T_max)
-def find_peak_dynamic(k1, epsilon, max_T=2.0):
-    # Спочатку швидко (0.01), потім дуже точно (0.0001)
-    steps = [0.01, 0.0001]
+def find_peak_dynamic(k1, epsilon, max_T=4.0e-2):
+    # Спочатку швидко (0.001), потім дуже точно (0.0001)
+    steps = [0.001, 0.0001]
     T_current = T0
 
     final_best_T = T0
@@ -46,7 +46,7 @@ def find_peak_dynamic(k1, epsilon, max_T=2.0):
 
         while T <= max_T:
             int_val = integral(T, k1, epsilon)
-            I_current = k1 * math.exp(-epsilon / T) * math.exp(-int_val)
+            I_current = k1 * math.exp(-epsilon / T) * pow((1 + k1 * int_val), -2)
 
             # Якщо знайшлась нова вершина - запам'ятати
             if I_current > best_I_stage:
@@ -73,16 +73,16 @@ def find_peak_dynamic(k1, epsilon, max_T=2.0):
     return round(final_best_T, 4), final_best_I
 
 # Знаходження параметрів (k1 та eps) для певної температури
-def find_parameters_for_target_peak(target_T, tolerance=0.002):
+def find_parameters_for_target_peak(target_T, tolerance=0.0005):
     print(f"\nПошук масиву параметрів для піку біля T = {target_T}...")
 
     valid_pairs = []
 
     # Перебір порядків величини для частотного фактору (k1)
-    for exp_step in range(0, 61):
-        exp = exp_step / 4.0
-        k1 = 10 ** exp
-        for e in range(1, 16):
+    for exp_step in range(10, 17):
+        k1 = 10 ** exp_step
+
+        for e in range(3, 16):
             epsilon = e / 10.0
 
             peak_T, peak_I = find_peak_dynamic(k1, epsilon)
@@ -128,31 +128,38 @@ def plot_results(curves_to_plot):
         if not peak_T:
             continue
 
-        T_max_plot = peak_T * 1.5
+        T_max_plot = 4e-2
 
-        T_values = []
+        T_celsius_values = []
         I_values = []
         current_T = T0
-        step = (T_max_plot - T0) / 200
+        step_plot = 0.0001
+        next_print_T = T0
 
         while current_T <= T_max_plot:
             int_val = integral(current_T, k1, epsilon)
-            I = k1 * math.exp(-epsilon / current_T) * math.exp(-int_val)
+            I = k1 * math.exp(-epsilon / current_T) * pow((1 + k1 * int_val), -2)
 
-            T_values.append(current_T)
+            T_celsius = current_T / 6.28e-5 - 273
+
+            T_celsius_values.append(T_celsius)
             I_values.append(I)
-            current_T += step
+            # Округлення для уникнення проблем з десятковою частиною
+            current_T = round(current_T + step_plot, 5)
 
         color = colors[idx % len(colors)]
 
-        plt.plot(T_values, I_values, linewidth=2, color=color, label=f'{label} (k1={k1:.1e}, eps={epsilon})')
-        plt.fill_between(T_values, I_values, color='gray', alpha=0.1)
+        plt.plot(T_celsius_values, I_values, linewidth=2, color=color, label=f'{label} (k1={k1:.1e}, eps={epsilon})')
+        plt.fill_between(T_celsius_values, I_values, color='gray', alpha=0.1)
 
-        plt.plot(peak_T, peak_I, 'ro', markersize=5)
-        plt.text(peak_T, peak_I * 1.05, f' T = {peak_T:.4f}\n I = {peak_I:.2f}', color=color, fontsize=9)
+        peak_T_celsius = peak_T / 6.28e-5 - 273
+
+        plt.plot(peak_T_celsius, peak_I, 'ro', markersize=5)
+        plt.annotate(f' T={peak_T_celsius:.1f}°C\n I={peak_I:.1f}', (peak_T_celsius, peak_I),
+                     textcoords="offset points", xytext=(8, 0), va='center', color=color, fontsize=9)
 
     plt.title('Залежність інтенсивності світіння I(T)')
-    plt.xlabel('Температура (T)')
+    plt.xlabel('Температура (°C)')
     plt.ylabel('Інтенсивність світіння (I)')
     plt.grid(True, linestyle='--')
 
@@ -166,16 +173,16 @@ def run_dosimetry_analysis():
     curves_to_plot = []
 
     # Тестове завдання
-    print("1. Аналіз тестового випадку (k1 = 10^13, eps = 1.2)")
-    curves_to_plot.append((1e13, 1.2, "Тест"))
+    print("1. Аналіз тестового випадку (k1 = 10^13, eps = 0.9)")
+    curves_to_plot.append((1e13, 0.9, "Тест"))
     print("Виконано!")
 
     # Обернена задача для фіксованих точок
     print("\n2. Виконання оберненої задачі пошуку")
-    targets = [0.03, 0.05]
+    targets = [3e-2]
     for target in targets:
         # Функція виведе весь масив у консоль, але поверне лише кілька кривих для малювання
-        found_subset = find_parameters_for_target_peak(target_T=target, tolerance=0.002)
+        found_subset = find_parameters_for_target_peak(target_T=target, tolerance=0.0005)
         if found_subset:
             curves_to_plot.extend(found_subset)
     print("Виконано!")
