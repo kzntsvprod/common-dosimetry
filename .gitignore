@@ -8,9 +8,20 @@ __pycache__/
 *$py.class
 
 # Віртуальне середовище
-venv/
+.venv/
 env/
 .env
+
+# Фронтенд
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Логи
+logs/
+npm-debug.log*
+*.log
 
 # Системні файли
 .DS_Store
