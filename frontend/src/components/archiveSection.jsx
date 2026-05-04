@@ -1,7 +1,10 @@
 import { BookOpen, ChevronRight, AlertTriangle, FileText } from 'lucide-react';
 
 const ArchiveSection = () => (
-   <section className="py-20 border-t border-slate-200 bg-slate-50">
+   <section
+      id="archive"
+      className="py-20 border-t border-slate-200 bg-slate-50"
+   >
       <div className="w-full px-6 md:px-12">
          <div className="mb-12 flex items-center gap-4 border-l-4 border-slate-400 pl-4">
             <h2 className="text-2xl font-bold text-slate-900 uppercase tracking-wider">

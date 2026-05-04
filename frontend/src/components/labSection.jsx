@@ -3,7 +3,7 @@ import SettingsPanel from './settingsPanel.jsx';
 import VisualizationPanel from './visualizationPanel.jsx';
 
 const LabSection = () => (
-   <section className="py-20 bg-slate-50 relative">
+   <section id="lab" className="py-20 bg-slate-50 relative">
       <div className="w-full px-6 md:px-12">
          <div className="mb-12 flex items-center gap-4 border-l-4 border-amber-500 pl-4">
             <h2 className="text-2xl font-bold text-slate-900 uppercase tracking-wider">

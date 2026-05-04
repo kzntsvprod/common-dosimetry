@@ -17,10 +17,13 @@ const Hero = () => (
             термолюмінесценції. Швидке обчислення кінетичних констант за
             оптимізаційним алгоритмом Common.
          </p>
-         <button className="bg-amber-500 text-white shadow-md font-bold py-4 px-8 rounded-sm uppercase tracking-widest transition-all flex items-center gap-3 cursor-pointer">
+         <a
+            href="#lab"
+            className="bg-amber-500 text-white shadow-md font-bold py-4 px-8 rounded-sm uppercase tracking-widest transition-all flex items-center gap-3 cursor-pointer"
+         >
             <Terminal className="w-5 h-5" />
             Розпочати аналіз
-         </button>
+         </a>
       </div>
    </header>
 );
