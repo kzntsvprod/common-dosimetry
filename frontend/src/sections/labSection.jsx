@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import UploadPanel from './uploadPanel.jsx';
-import SettingsPanel from './settingsPanel.jsx';
-import StatusBar from './statusBar.jsx';
-import ResultsBoard from './resultsBoard.jsx';
-import VisualizationPanel from './visualizationPanel.jsx';
+import UploadPanel from '../components/uploadPanel.jsx';
+import SettingsPanel from '../components/settingsPanel.jsx';
+import StatusBar from '../components/statusBar.jsx';
+import ResultsBoard from '../components/resultsBoard.jsx';
+import VisualizationPanel from '../components/visualizationPanel.jsx';
 
 const LabSection = ({ isActive, isDarkMode }) => {
    const [status, setStatus] = useState('idle');

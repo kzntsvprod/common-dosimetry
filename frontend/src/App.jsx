@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import Header from './components/header.jsx';
-import Hero from './components/hero.jsx';
-import LabSection from './components/labSection.jsx';
-import ArchiveSection from './components/archiveSection.jsx';
-import Footer from './components/footer.jsx';
+import Header from './sections/header.jsx';
+import Hero from './sections/hero.jsx';
+import LabSection from './sections/labSection.jsx';
+import ArchiveSection from './sections/archiveSection.jsx';
+import Footer from './sections/footer.jsx';
 
 function App() {
    const [isDarkMode, setIsDarkMode] = useState(false);
