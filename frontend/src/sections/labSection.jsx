@@ -8,25 +8,62 @@ import VisualizationPanel from '../components/visualizationPanel.jsx';
 const LabSection = ({ isActive, isDarkMode }) => {
    const [status, setStatus] = useState('idle');
    const [progress, setProgress] = useState(0);
+   const [results, setResults] = useState(null);
 
-   const handleUpload = () => {
+   const [config, setConfig] = useState({
+      beta: 1.0,
+      epsMin: 0.1,
+      epsMax: 2.5,
+      sMin: 8,
+      sMax: 15,
+      method: 'fast',
+   });
+
+   const handleRunAnalysis = async (file) => {
       setStatus('computing');
-      setProgress(0);
+      setProgress(10);
 
-      const interval = setInterval(() => {
-         setProgress((prev) => {
-            if (prev >= 100) {
-               clearInterval(interval);
-               setTimeout(() => setStatus('results'), 400);
-               return 100;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('beta', config.beta);
+      formData.append('eps_min', config.epsMin);
+      formData.append('eps_max', config.epsMax);
+      formData.append('s_exp_min', config.sMin);
+      formData.append('s_exp_max', config.sMax);
+      formData.append('method', config.method);
+
+      try {
+         setProgress(40);
+         const response = await fetch(
+            'http://127.0.0.1:8000/api/optimization/process',
+            {
+               method: 'POST',
+               body: formData,
             }
-            const jump = Math.floor(Math.random() * 15) + 5;
-            return Math.min(prev + jump, 100);
-         });
-      }, 400);
+         );
+
+         if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.detail || 'Помилка сервера');
+         }
+
+         const data = await response.json();
+
+         setProgress(100);
+         setResults(data);
+         setTimeout(() => setStatus('results'), 400);
+      } catch (err) {
+         console.error('Деталі помилки:', err.message);
+         setStatus('idle');
+         setProgress(0);
+      }
    };
 
-   const resetAnalysis = () => setStatus('idle');
+   const resetAnalysis = () => {
+      setResults(null);
+      setStatus('idle');
+      setProgress(0);
+   };
 
    return (
       <section
@@ -50,21 +87,38 @@ const LabSection = ({ isActive, isDarkMode }) => {
                <div className="lg:col-span-1 flex flex-col gap-6">
                   {status === 'idle' && (
                      <>
-                        <UploadPanel onUpload={handleUpload} />
-                        <SettingsPanel disabled={false} />
+                        <UploadPanel
+                           onUpload={(file) => handleRunAnalysis(file)}
+                        />
+                        <SettingsPanel
+                           config={config}
+                           setConfig={setConfig}
+                           disabled={false}
+                        />
                      </>
                   )}
                   {status === 'computing' && (
                      <>
                         <StatusBar progress={progress} />
-                        <SettingsPanel disabled={true} />
+                        <SettingsPanel
+                           config={config}
+                           setConfig={setConfig}
+                           disabled={true}
+                        />
                      </>
                   )}
                   {status === 'results' && (
-                     <ResultsBoard onReset={resetAnalysis} />
+                     <ResultsBoard
+                        onReset={resetAnalysis}
+                        resultsData={results}
+                     />
                   )}
                </div>
-               <VisualizationPanel status={status} isDarkMode={isDarkMode} />
+               <VisualizationPanel
+                  status={status}
+                  isDarkMode={isDarkMode}
+                  resultsData={results}
+               />
             </div>
          </div>
       </section>

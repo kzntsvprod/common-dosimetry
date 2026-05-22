@@ -72,7 +72,7 @@ const ArchiveSection = ({ isActive }) => {
                <ul className="space-y-4">
                   <li className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800">
                      <span className="text-amber-600 dark:text-amber-400 font-mono font-bold text-lg mb-1 block">
-                        k₁{' '}
+                        <span className="italic">s</span>{' '}
                         <span className="text-sm text-slate-500 dark:text-slate-400 font-sans font-normal ml-2">
                            Частотний фактор (с⁻¹)
                         </span>
@@ -196,7 +196,7 @@ const ArchiveSection = ({ isActive }) => {
                   <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2 flex-1 pointer-events-none">
                      <li>
                         <span className="text-slate-900 dark:text-slate-200 font-mono font-semibold">
-                           k₁
+                           <span className="italic">s</span>{' '}
                         </span>{' '}
                         - Частотний фактор
                      </li>

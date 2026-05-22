@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Activity } from 'lucide-react';
 import {
    ResponsiveContainer,
@@ -11,11 +10,16 @@ import {
    Area,
    Line,
 } from 'recharts';
-import { generateChartData } from '../services/generateChartData.js';
 import CustomTooltip from './customTooltip.jsx';
 
-const VisualizationPanel = ({ status, isDarkMode }) => {
-   const [chartData] = useState(generateChartData);
+const VisualizationPanel = ({ status, isDarkMode, resultsData }) => {
+   const chartData = resultsData?.chart_data
+      ? resultsData.chart_data.temperature.map((t, i) => ({
+           temp: t,
+           experiment: resultsData.chart_data.experimental_intensity[i],
+           theory: resultsData.chart_data.theoretical_intensity[i],
+        }))
+      : [];
 
    return (
       <div className="lg:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm rounded-lg p-6 flex flex-col min-h-[450px] transition-colors">
@@ -61,7 +65,7 @@ const VisualizationPanel = ({ status, isDarkMode }) => {
                         <XAxis
                            dataKey="temp"
                            type="number"
-                           domain={[50, 450]}
+                           domain={['auto', 'auto']}
                            tickCount={9}
                            stroke={isDarkMode ? '#64748b' : '#94a3b8'}
                            tick={{

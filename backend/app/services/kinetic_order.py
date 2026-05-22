@@ -74,11 +74,18 @@ def generate_theoretical_curve(T_array, s, beta, epsilon, b, fast_mode=True):
 
 
 # Знаходження параметрів оберненої задачі
-def find_parameters_for_target_peak(x_exp, y_clean, max_y_exp, area_exp, T_K, beta):
+def find_parameters_for_target_peak(x_exp, y_clean, max_y_exp, area_exp, T_K, beta, eps_bounds=(0.1, 2.0), s_exp_bounds=(1.0, 20.5), method="fast"):
     best_fom = float('inf')
     best_params = None
     best_curve = None
     best_delta_S = float('inf')
+
+    # Прапорець для обраного методу
+    is_fast_mode = (method == "fast")
+
+    # Межі
+    eps_min, eps_max = eps_bounds
+    exp_min, exp_max = s_exp_bounds
 
     # Налаштування етапів сіткового пошуку
     stages = [
@@ -88,26 +95,27 @@ def find_parameters_for_target_peak(x_exp, y_clean, max_y_exp, area_exp, T_K, be
         (0.002, 0.0005, 0.005, 0.03, 0.005, 0.1)
     ]
 
+    # Динамічні початкові центри
     current_center_b = 1.5
-    current_center_eps = 1.05
-    current_center_exp = 11.5
+    current_center_eps = (eps_min + eps_max) / 2.0
+    current_center_exp = (exp_min + exp_max) / 2.0
 
     for stage_idx, (b_step, eps_step, exp_step_size, b_rad, eps_rad, exp_rad) in enumerate(stages):
         if stage_idx == 0:
             b_range = np.arange(1.0, 2.1, b_step)
-            eps_range = np.arange(0.9, 2.0, eps_step)
-            exp_range = np.arange(10.0, 13.5, exp_step_size)
+            eps_range = np.arange(eps_min, eps_max + eps_step * 0.1, eps_step)
+            exp_range = np.arange(exp_min, exp_max + exp_step_size * 0.1, exp_step_size)
         else:
             b_range = np.arange(max(1.0, current_center_b - b_rad), min(2.1, current_center_b + b_rad), b_step)
-            eps_range = np.arange(max(0.9, current_center_eps - eps_rad), min(2.0, current_center_eps + eps_rad), eps_step)
-            exp_range = np.arange(max(10.0, current_center_exp - exp_rad), min(13.5, current_center_exp + exp_rad), exp_step_size)
+            eps_range = np.arange(max(eps_min, current_center_eps - eps_rad), min(eps_max, current_center_eps + eps_rad), eps_step)
+            exp_range = np.arange(max(exp_min, current_center_exp - exp_rad), min(exp_max, current_center_exp + exp_rad), exp_step_size)
 
         for b in b_range:
             for epsilon in eps_range:
                 for exp_step in exp_range:
                     s = 10 ** exp_step
 
-                    I_raw = generate_theoretical_curve(T_K, s, beta, epsilon, b, fast_mode=True)
+                    I_raw = generate_theoretical_curve(T_K, s, beta, epsilon, b, fast_mode=is_fast_mode)
                     max_I_raw = np.max(I_raw)
 
                     if max_I_raw <= 0 or math.isnan(max_I_raw) or math.isinf(max_I_raw):
@@ -173,15 +181,22 @@ def parse_and_clean_data(file_content: str):
     if len(x_exp) == 0 or len(y_exp) == 0:
         raise ValueError("Не вдалося зчитати дані. Перевірте формат або розділювачі.")
 
-    slope = (y_exp[-1] - y_exp[0]) / (x_exp[-1] - x_exp[0])
-    intercept = y_exp[0] - slope * x_exp[0]
-    background = slope * x_exp + intercept
-    y_clean = np.maximum(y_exp - background, 0)
+    background_level = y_exp[0]
+
+    y_clean = np.maximum(y_exp - background_level, 0)
 
     return x_exp, y_exp, y_clean
 
 # Запуск програми
-def process_optimization(file_content: str, beta: float = 1.0) -> dict:
+def process_optimization(
+        file_content: str,
+        beta: float = 1.0,
+        eps_min: float = 0.1,
+        eps_max: float = 2.0,
+        s_exp_min: float = 1.0,
+        s_exp_max: float = 20.5,
+        method: str = "fast"
+) -> dict:
     x_exp, y_raw, y_clean = parse_and_clean_data(file_content)
     T_K = x_exp + 273.15
     max_y_exp = np.max(y_clean)
@@ -193,11 +208,14 @@ def process_optimization(file_content: str, beta: float = 1.0) -> dict:
         area_exp = np.trapz(y_clean, x_exp)
 
     best_params, best_fom, best_delta_S, best_curve = find_parameters_for_target_peak(
-        x_exp, y_clean, max_y_exp, area_exp, T_K, beta
+        x_exp, y_clean, max_y_exp, area_exp, T_K, beta,
+        eps_bounds=(eps_min, eps_max),
+        s_exp_bounds=(s_exp_min, s_exp_max),
+        method=method
     )
 
     if not best_params:
-        raise ValueError("Не вдалося знайти оптимальні параметри.")
+        raise ValueError("Не вдалося знайти оптимальні параметри в заданих межах.")
 
     best_exp_step, best_epsilon, best_b = best_params
 
