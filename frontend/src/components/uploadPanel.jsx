@@ -1,8 +1,23 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { UploadCloud } from 'lucide-react';
 
 const UploadPanel = ({ onUpload }) => {
    const fileInputRef = useRef(null);
+   const [isDragging, setIsDragging] = useState(false);
+
+   useEffect(() => {
+      const preventDefaultBehavior = (e) => {
+         e.preventDefault();
+      };
+
+      window.addEventListener('dragover', preventDefaultBehavior);
+      window.addEventListener('drop', preventDefaultBehavior);
+
+      return () => {
+         window.removeEventListener('dragover', preventDefaultBehavior);
+         window.removeEventListener('drop', preventDefaultBehavior);
+      };
+   }, []);
 
    const handleDivClick = () => {
       fileInputRef.current.click();
@@ -12,6 +27,40 @@ const UploadPanel = ({ onUpload }) => {
       const file = event.target.files[0];
       if (file) {
          onUpload(file);
+      }
+   };
+
+   const handleDragEnter = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(true);
+   };
+
+   const handleDragOver = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(true);
+   };
+
+   const handleDragLeave = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+         setIsDragging(false);
+      }
+   };
+
+   const handleDrop = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+
+      const file = e.dataTransfer?.files[0];
+
+      if (file && (file.name.endsWith('.csv') || file.name.endsWith('.txt'))) {
+         onUpload(file);
+      } else if (file) {
+         alert('Будь ласка, завантажте файл у форматі .csv або .txt');
       }
    };
 
@@ -26,17 +75,41 @@ const UploadPanel = ({ onUpload }) => {
          />
          <div
             onClick={handleDivClick}
-            className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:border-amber-400 dark:hover:border-amber-500 group"
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer group ${
+               isDragging
+                  ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/30'
+                  : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:border-amber-400 dark:hover:border-amber-500'
+            }`}
          >
-            <UploadCloud className="w-12 h-12 mb-4 text-slate-400 dark:text-slate-500 group-hover:text-amber-500 transition-colors" />
-            <h3 className="text-slate-900 dark:text-white font-bold mb-2 transition-colors">
-               Завантажити дані
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 transition-colors">
-               Формати .csv або .txt
-            </p>
-            <div className="font-mono text-xs text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 group-hover:bg-amber-50 dark:group-hover:bg-amber-900/30 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
-               Клікніть для вибору файлу
+            <div className="pointer-events-none flex flex-col items-center">
+               <UploadCloud
+                  className={`w-12 h-12 mb-4 transition-colors ${
+                     isDragging
+                        ? 'text-amber-500'
+                        : 'text-slate-400 dark:text-slate-500 group-hover:text-amber-500'
+                  }`}
+               />
+               <h3 className="text-slate-900 dark:text-white font-bold mb-2 transition-colors">
+                  Завантажити дані
+               </h3>
+               <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 transition-colors">
+                  Формати .csv або .txt
+               </p>
+               <div
+                  className={`font-mono text-xs px-3 py-1.5 rounded-md border transition-colors ${
+                     isDragging
+                        ? 'bg-amber-100 border-amber-300 text-amber-800 dark:bg-amber-900/50 dark:border-amber-700 dark:text-amber-300'
+                        : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 group-hover:bg-amber-50 dark:group-hover:bg-amber-900/30 group-hover:text-amber-700 dark:group-hover:text-amber-400'
+                  }`}
+               >
+                  {isDragging
+                     ? 'Відпустіть файл тут'
+                     : 'Клікніть або перетягніть файл'}
+               </div>
             </div>
          </div>
       </>
