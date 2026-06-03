@@ -8,7 +8,7 @@ router = APIRouter(prefix="/api/optimization", tags=["Optimization"])
 @router.post("/process", response_model=OptimizationResponse)
 async def optimize_glow_curve(
         file: UploadFile = File(...),
-        beta: float = Form(1.0, description="Швидкість нагрівання (°C/с)"),
+        beta: float = Form(1.0, description="Швидкість нагрівання (К/с)"),
         eps_min: float = Form(0.1, description="Мінімальна енергія активації (eV)"),
         eps_max: float = Form(2.0, description="Максимальна енергія активації (eV)"),
         s_exp_min: float = Form(1.0, description="Мінімальний степінь частотного фактору (log10(s))"),

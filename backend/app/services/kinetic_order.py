@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from scipy.ndimage import gaussian_filter1d
 
 # Функція інтенсивності світіння
 def integral_func(T_K, kB, epsilon):
@@ -34,11 +35,11 @@ def generate_curve_simpson(T_K, s, beta, epsilon, b):
             int_val = simpson_rule(integral_func, T0, T, 100, kB, epsilon)
 
         if abs(b - 1.0) < 0.001:
-            I_val = k_eff * math.exp(-epsilon / (kB * T)) * math.exp(-k_eff * int_val)
+            I_val = s * math.exp(-epsilon / (kB * T)) * math.exp(-k_eff * int_val)
         else:
             base = 1 + k_eff * (b - 1) * int_val
             base = max(base, 1e-10)
-            I_val = k_eff * math.exp(-epsilon / (kB * T)) * math.pow(base, -b / (b - 1))
+            I_val = s * math.exp(-epsilon / (kB * T)) * math.pow(base, -b / (b - 1))
         I_array.append(I_val)
     return np.array(I_array)
 
@@ -58,11 +59,11 @@ def generate_curve_fast(T_K, s, beta, epsilon, b):
     k_eff = s / beta
 
     if abs(b - 1.0) < 0.001:
-        I_array = k_eff * integrand * np.exp(-k_eff * cum_int)
+        I_array = s * integrand * np.exp(-k_eff * cum_int)
     else:
         base = 1 + k_eff * (b - 1) * cum_int
         base = np.maximum(base, 1e-10)
-        I_array = k_eff * integrand * np.power(base, -b / (b - 1))
+        I_array = s * integrand * np.power(base, -b / (b - 1))
     return I_array
 
 # Перемикач режиму генерації теоретичної кривої
@@ -146,8 +147,8 @@ def find_parameters_for_target_peak(x_exp, y_clean, max_y_exp, area_exp, T_K, be
     return best_params, best_fom, best_delta_S, best_curve
 
 # Розбиття та очищення даних
-def parse_and_clean_data(file_content: str):
-    x_data, y_data = [], []
+def parse_and_clean_data(file_content: str, sigma: float = 2.0):
+    x_data, y_data, bg_data = [], [], []
     lines = file_content.splitlines()
 
     for line in lines:
@@ -166,26 +167,41 @@ def parse_and_clean_data(file_content: str):
 
         parts = [p.strip() for p in parts if p.strip()]
 
+        # Перевіряємо наявність мінімум 2 колонок
         if len(parts) >= 2:
             try:
                 x_val = float(parts[0].replace(',', '.'))
                 y_val = float(parts[1].replace(',', '.'))
+
+                # Якщо є третя колонка, беремо фон з неї, інакше - фон 0
+                if len(parts) >= 3:
+                    bg_val = float(parts[2].replace(',', '.'))
+                else:
+                    bg_val = 0.0
+
                 x_data.append(x_val)
                 y_data.append(y_val)
+                bg_data.append(bg_val)
             except ValueError:
                 continue
 
     x_exp = np.array(x_data)
     y_exp = np.array(y_data)
+    y_bg = np.array(bg_data)
 
-    if len(x_exp) == 0 or len(y_exp) == 0:
-        raise ValueError("Не вдалося зчитати дані. Перевірте формат або розділювачі.")
+    if len(x_exp) == 0:
+        raise ValueError("Не вдалося зчитати дані. Перевірте, чи файл містить 2 або 3 колонки чисел.")
 
-    background_level = y_exp[0]
+    # Фізичне віднімання фону
+    y_clean_raw = y_exp - y_bg
 
-    y_clean = np.maximum(y_exp - background_level, 0)
+    # Захист від випадкових мінусів через шуми
+    y_clean_raw = np.maximum(y_clean_raw, 0)
 
-    return x_exp, y_exp, y_clean
+    # Математичний препроцесинг (гаусіан) для згладжування
+    y_smoothed = gaussian_filter1d(y_clean_raw, sigma=sigma)
+
+    return x_exp, y_exp, y_smoothed
 
 # Запуск програми
 def process_optimization(

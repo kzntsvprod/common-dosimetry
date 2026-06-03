@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.routes import router as optimization_router
 
 app = FastAPI(
-    title="Common Dosimetry API",
+    title="Commoni API",
     description="API для розрахунку кінетичних параметрів термолюмінесценції",
     version="1.0.0"
 )
