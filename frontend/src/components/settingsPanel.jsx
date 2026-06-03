@@ -50,7 +50,7 @@ const SettingsPanel = ({ disabled, config, setConfig }) => (
          <div className="space-y-5">
             <div>
                <label className="text-[10px] text-slate-600 dark:text-slate-400 font-mono mb-2 flex justify-between uppercase font-semibold">
-                  <span>Швидкість нагріву (beta)</span>
+                  <span>Швидкість нагріву (beta), К/с</span>
                </label>
                <input
                   type="text"

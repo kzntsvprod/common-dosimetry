@@ -1,4 +1,5 @@
 import { Radiation, Sun, Moon } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 const Header = ({
    activeSection,
@@ -14,12 +15,14 @@ const Header = ({
                e.preventDefault();
                window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="flex items-center gap-3 group cursor-pointer"
+            className="flex items-center group cursor-pointer"
          >
             <Radiation className="text-amber-600 dark:text-amber-500 w-6 h-6 group-hover:rotate-180 transition-transform duration-700" />
-            <span className="font-mono font-bold text-slate-900 dark:text-white tracking-widest uppercase transition-colors">
-               Common <span className="text-amber-500">Dosimetry</span>
-            </span>
+            <img
+               src={logo}
+               alt="Common Logo"
+               className="h-18 w-auto object-contain"
+            />
          </a>
          <div className="hidden md:flex gap-8 text-sm font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider items-center h-full">
             <a
