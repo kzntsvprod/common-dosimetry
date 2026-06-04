@@ -35,7 +35,7 @@ const LabSection = ({ isActive, isDarkMode }) => {
       try {
          setProgress(40);
          const response = await fetch(
-            'http://127.0.0.1:8000/api/optimization/process',
+            `${import.meta.env.VITE_API_URL}/api/optimization/process`,
             {
                method: 'POST',
                body: formData,
