@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from 'react';
 import { Printer, X, Radiation } from 'lucide-react';
 import {
    ResponsiveContainer,
@@ -10,77 +9,19 @@ import {
    Area,
    Line,
 } from 'recharts';
-import { toPng } from 'html-to-image';
-import { jsPDF } from 'jspdf';
+import { useDocumentSection } from '../hooks/useDocumentSection.js';
 
 const DocumentSection = ({ onClose, resultsData }) => {
-   const reportRef = useRef(null);
-   const [isGenerating, setIsGenerating] = useState(false);
-
-   const [reportId] = useState(() =>
-      Math.random().toString(36).substring(2, 10).toUpperCase()
-   );
-
-   useEffect(() => {
-      document.body.style.overflow = 'hidden';
-      return () => {
-         document.body.style.overflow = '';
-      };
-   }, []);
-
-   const chartData = resultsData?.chart_data
-      ? resultsData.chart_data.temperature.map((t, i) => ({
-           temp: t,
-           experiment: resultsData.chart_data.experimental_intensity[i],
-           theory: resultsData.chart_data.theoretical_intensity[i],
-        }))
-      : [];
-
-   const params = resultsData?.parameters || {};
-   const metrics = resultsData?.metrics || {};
-
-   const peakPoint = chartData.reduce(
-      (max, point) => (point.experiment > max.experiment ? point : max),
-      { temp: 0, experiment: 0 }
-   );
-
-   const handleDownloadPDF = async () => {
-      const element = reportRef.current;
-      if (!element) return;
-
-      try {
-         setIsGenerating(true);
-
-         const imgData = await toPng(element, {
-            quality: 1,
-            pixelRatio: 2,
-            backgroundColor: '#ffffff',
-            style: {
-               transform: 'none',
-               margin: '0',
-            },
-         });
-
-         const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4',
-         });
-
-         const pdfWidth = pdf.internal.pageSize.getWidth();
-         const pdfHeight =
-            (element.offsetHeight * pdfWidth) / element.offsetWidth;
-
-         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-         const dateString = new Date().toISOString().split('T')[0];
-         pdf.save(`Protocol_${dateString}_${reportId}.pdf`);
-      } catch (error) {
-         console.error('Помилка при генерації PDF:', error);
-      } finally {
-         setIsGenerating(false);
-      }
-   };
+   const {
+      reportRef,
+      isGenerating,
+      reportId,
+      chartData,
+      params,
+      metrics,
+      peakPoint,
+      handleDownloadPDF,
+   } = useDocumentSection(resultsData);
 
    return (
       <>

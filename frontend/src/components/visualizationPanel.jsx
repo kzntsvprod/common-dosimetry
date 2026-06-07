@@ -11,15 +11,10 @@ import {
    Line,
 } from 'recharts';
 import CustomTooltip from './customTooltip.jsx';
+import { useVisualizationPanel } from '../hooks/useVisualizationPanel.js';
 
 const VisualizationPanel = ({ status, isDarkMode, resultsData }) => {
-   const chartData = resultsData?.chart_data
-      ? resultsData.chart_data.temperature.map((t, i) => ({
-           temp: t,
-           experiment: resultsData.chart_data.experimental_intensity[i],
-           theory: resultsData.chart_data.theoretical_intensity[i],
-        }))
-      : [];
+   const { chartData } = useVisualizationPanel(resultsData);
 
    return (
       <div className="lg:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm rounded-lg p-6 flex flex-col min-h-[450px] transition-colors">

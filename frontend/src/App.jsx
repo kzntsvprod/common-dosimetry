@@ -1,58 +1,18 @@
-import { useState, useEffect } from 'react';
 import Header from './sections/header.jsx';
 import Hero from './sections/hero.jsx';
 import LabSection from './sections/labSection.jsx';
 import ArchiveSection from './sections/archiveSection.jsx';
 import Footer from './sections/footer.jsx';
+import { useTheme } from './hooks/useTheme.js';
+import { useNavigation } from './hooks/useNavigation.js';
 
 function App() {
-   const [isDarkMode, setIsDarkMode] = useState(false);
-   const [activeSection, setActiveSection] = useState('hero');
-
-   const toggleTheme = () => setIsDarkMode(!isDarkMode);
-
-   useEffect(() => {
-      if (isDarkMode) {
-         document.documentElement.classList.add('dark');
-      } else {
-         document.documentElement.classList.remove('dark');
-      }
-   }, [isDarkMode]);
-
-   useEffect(() => {
-      const handleScroll = () => {
-         const sections = ['hero', 'lab', 'archive'];
-         const scrollPosition = window.scrollY + window.innerHeight / 3;
-
-         for (const section of sections) {
-            const element = document.getElementById(section);
-            if (element) {
-               const { top, bottom } = element.getBoundingClientRect();
-               const absoluteTop = top + window.scrollY;
-               const absoluteBottom = bottom + window.scrollY;
-
-               if (
-                  scrollPosition >= absoluteTop &&
-                  scrollPosition < absoluteBottom
-               ) {
-                  setActiveSection(section);
-                  break;
-               }
-            }
-         }
-      };
-
-      window.addEventListener('scroll', handleScroll);
-      return () => window.removeEventListener('scroll', handleScroll);
-   }, []);
-
-   const scrollToSection = (e, sectionId) => {
-      e.preventDefault();
-      const element = document.getElementById(sectionId);
-      if (element) {
-         element.scrollIntoView({ behavior: 'smooth' });
-      }
-   };
+   const { isDarkMode, toggleTheme } = useTheme();
+   const { activeSection, scrollToSection } = useNavigation([
+      'hero',
+      'lab',
+      'archive',
+   ]);
 
    return (
       <div

@@ -1,12 +1,10 @@
-import { useState } from 'react';
 import { CheckCircle2, Download } from 'lucide-react';
 import DocumentSection from '../sections/documentSection.jsx';
+import { useResultsBoard } from '../hooks/useResultsBoard.js';
 
 const ResultsBoard = ({ onReset, resultsData }) => {
-   const [showReport, setShowReport] = useState(false);
-
-   const params = resultsData?.parameters || {};
-   const metrics = resultsData?.metrics || {};
+   const { showReport, params, metrics, openReport, closeReport } =
+      useResultsBoard(resultsData);
 
    return (
       <>
@@ -94,7 +92,7 @@ const ResultsBoard = ({ onReset, resultsData }) => {
                   Новий аналіз
                </button>
                <button
-                  onClick={() => setShowReport(true)}
+                  onClick={openReport}
                   className="w-full bg-slate-800 dark:bg-amber-600 text-white shadow-md font-bold py-3 px-4 rounded hover:bg-slate-700 dark:hover:bg-amber-500 uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2"
                >
                   <Download className="w-4 h-4" /> Експорт у PDF
@@ -102,10 +100,7 @@ const ResultsBoard = ({ onReset, resultsData }) => {
             </div>
          </div>
          {showReport && (
-            <DocumentSection
-               onClose={() => setShowReport(false)}
-               resultsData={resultsData}
-            />
+            <DocumentSection onClose={closeReport} resultsData={resultsData} />
          )}
       </>
    );
