@@ -4,6 +4,8 @@ export const useLabSection = () => {
    const [status, setStatus] = useState('idle');
    const [progress, setProgress] = useState(0);
    const [results, setResults] = useState(null);
+   const [rateLimitError, setRateLimitError] = useState(null);
+   const [validationError, setValidationError] = useState(null);
 
    const [config, setConfig] = useState({
       beta: 1.0,
@@ -15,6 +17,38 @@ export const useLabSection = () => {
    });
 
    const handleRunAnalysis = async (file) => {
+      setRateLimitError(null);
+      setValidationError(null);
+
+      const epsMinNum = parseFloat(config.epsMin);
+      const epsMaxNum = parseFloat(config.epsMax);
+      const sMinNum = parseFloat(config.sMin);
+      const sMaxNum = parseFloat(config.sMax);
+
+      if (
+         isNaN(epsMinNum) ||
+         isNaN(epsMaxNum) ||
+         isNaN(sMinNum) ||
+         isNaN(sMaxNum)
+      ) {
+         setValidationError('Всі поля обмежень повинні бути числами.');
+         return;
+      }
+
+      if (epsMinNum >= epsMaxNum) {
+         setValidationError(
+            'Мінімальна енергія активації (E) повинна бути меншою за максимальну.'
+         );
+         return;
+      }
+
+      if (sMinNum >= sMaxNum) {
+         setValidationError(
+            'Мінімальний степінь частотного фактора повинен бути меншим за максимальний.'
+         );
+         return;
+      }
+
       setStatus('computing');
       setProgress(10);
 
@@ -37,8 +71,23 @@ export const useLabSection = () => {
             }
          );
 
+         if (response.status === 429) {
+            setRateLimitError(
+               'Ви вичерпали ліміт (5 запитів на хвилину). Зачекайте трішки перед наступною спробою.'
+            );
+            setStatus('idle');
+            setProgress(0);
+            return;
+         }
+
          if (!response.ok) {
             const errData = await response.json();
+            if (response.status === 400) {
+               setValidationError(errData.detail || 'Некоректні дані');
+               setStatus('idle');
+               setProgress(0);
+               return;
+            }
             throw new Error(errData.detail || 'Помилка сервера');
          }
 
@@ -49,6 +98,7 @@ export const useLabSection = () => {
          setTimeout(() => setStatus('results'), 400);
       } catch (err) {
          console.error('Деталі помилки:', err.message);
+         setValidationError(`Помилка сервера: ${err.message}`);
          setStatus('idle');
          setProgress(0);
       }
@@ -58,6 +108,8 @@ export const useLabSection = () => {
       setResults(null);
       setStatus('idle');
       setProgress(0);
+      setRateLimitError(null);
+      setValidationError(null);
    };
 
    return {
@@ -66,6 +118,10 @@ export const useLabSection = () => {
       results,
       config,
       setConfig,
+      rateLimitError,
+      setRateLimitError,
+      validationError,
+      setValidationError,
       handleRunAnalysis,
       resetAnalysis,
    };

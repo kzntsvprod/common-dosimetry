@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from 'react';
 export const useUploadPanel = (onUpload) => {
    const fileInputRef = useRef(null);
    const [isDragging, setIsDragging] = useState(false);
+   const [error, setError] = useState(null);
 
    useEffect(() => {
       const preventDefaultBehavior = (e) => {
@@ -22,11 +23,24 @@ export const useUploadPanel = (onUpload) => {
       fileInputRef.current.click();
    };
 
+   const validateAndUpload = (file) => {
+      setError(null);
+      if (!file) return;
+
+      if (file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
+         onUpload(file);
+      } else {
+         setError('Будь ласка, завантажте файл у форматі .csv або .txt!');
+      }
+
+      if (fileInputRef.current) {
+         fileInputRef.current.value = '';
+      }
+   };
+
    const handleFileChange = (event) => {
       const file = event.target.files[0];
-      if (file) {
-         onUpload(file);
-      }
+      validateAndUpload(file);
    };
 
    const handleDragEnter = (e) => {
@@ -55,17 +69,14 @@ export const useUploadPanel = (onUpload) => {
       setIsDragging(false);
 
       const file = e.dataTransfer?.files[0];
-
-      if (file && (file.name.endsWith('.csv') || file.name.endsWith('.txt'))) {
-         onUpload(file);
-      } else if (file) {
-         alert('Будь ласка, завантажте файл у форматі .csv або .txt');
-      }
+      validateAndUpload(file);
    };
 
    return {
       fileInputRef,
       isDragging,
+      error,
+      setError,
       handleDivClick,
       handleFileChange,
       handleDragEnter,

@@ -91,7 +91,7 @@ const SettingsPanel = ({ disabled, config, setConfig }) => (
             </div>
             <div>
                <label className="text-[10px] text-slate-600 dark:text-slate-400 font-mono mb-2 flex justify-between uppercase font-semibold">
-                  <span>Частотний фактор (s), с⁻¹</span>
+                  <span>Частотний фактор (x для s = 10ˣ), с⁻¹</span>
                </label>
                <div className="flex items-center gap-2">
                   <input

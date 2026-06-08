@@ -1,10 +1,13 @@
 import { UploadCloud } from 'lucide-react';
 import { useUploadPanel } from '../hooks/useUploadPanel.js';
+import Alert from '../components/alert.jsx';
 
 const UploadPanel = ({ onUpload }) => {
    const {
       fileInputRef,
       isDragging,
+      error,
+      setError,
       handleDivClick,
       handleFileChange,
       handleDragEnter,
@@ -12,8 +15,15 @@ const UploadPanel = ({ onUpload }) => {
       handleDragLeave,
       handleDrop,
    } = useUploadPanel(onUpload);
+
    return (
-      <>
+      <div className="w-full flex flex-col gap-4">
+         <Alert
+            type="error"
+            title="Помилка завантаження"
+            message={error}
+            onClose={() => setError(null)}
+         />
          <input
             type="file"
             ref={fileInputRef}
@@ -60,7 +70,7 @@ const UploadPanel = ({ onUpload }) => {
                </div>
             </div>
          </div>
-      </>
+      </div>
    );
 };
 
