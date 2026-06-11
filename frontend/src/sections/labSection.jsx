@@ -19,6 +19,7 @@ const LabSection = ({ isActive, isDarkMode }) => {
       setRateLimitError,
       validationError,
       setValidationError,
+      fileName,
    } = useLabSection();
 
    return (
@@ -92,6 +93,7 @@ const LabSection = ({ isActive, isDarkMode }) => {
                      <ResultsBoard
                         onReset={resetAnalysis}
                         resultsData={results}
+                        fileName={fileName}
                      />
                   )}
                </div>

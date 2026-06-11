@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { useDocumentSection } from '../hooks/useDocumentSection.js';
 
-const DocumentSection = ({ onClose, resultsData }) => {
+const DocumentSection = ({ onClose, resultsData, fileName }) => {
    const {
       reportRef,
       isGenerating,
@@ -21,7 +21,7 @@ const DocumentSection = ({ onClose, resultsData }) => {
       metrics,
       peakPoint,
       handleDownloadPDF,
-   } = useDocumentSection(resultsData);
+   } = useDocumentSection(resultsData, fileName);
 
    return (
       <>
@@ -101,27 +101,32 @@ const DocumentSection = ({ onClose, resultsData }) => {
                         </div>
                      </div>
                      <div
-                        className="text-right font-mono text-[11px] text-slate-600 bg-slate-50 p-3 rounded border border-slate-100 print:bg-slate-50 print:border-slate-200"
+                        className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-left font-mono text-[11px] bg-slate-50 p-3.5 rounded-lg border border-slate-200 print:bg-slate-50 print:border-slate-200 shadow-sm transition-all"
                         style={{
                            WebkitPrintColorAdjust: 'exact',
                            printColorAdjust: 'exact',
                         }}
                      >
-                        <p className="mb-1">
-                           <span className="font-bold text-slate-900">
-                              ДАТА:
-                           </span>{' '}
+                        <span className="font-bold text-slate-900">ФАЙЛ:</span>
+                        <span
+                           className="max-w-[160px] truncate text-slate-600"
+                           title={fileName || resultsData?.file_name}
+                        >
+                           {fileName || resultsData?.file_name || 'Не вказано'}
+                        </span>
+
+                        <span className="font-bold text-slate-900">ДАТА:</span>
+                        <span className="text-slate-600">
                            {new Date().toLocaleDateString('uk-UA')}
-                        </p>
-                        <p>
-                           <span className="font-bold text-slate-900">
-                              ЧАС:
-                           </span>{' '}
+                        </span>
+
+                        <span className="font-bold text-slate-900">ЧАС:</span>
+                        <span className="text-slate-600">
                            {new Date().toLocaleTimeString('uk-UA', {
                               hour: '2-digit',
                               minute: '2-digit',
                            })}
-                        </p>
+                        </span>
                      </div>
                   </div>
                   <div className="mb-8">

@@ -7,6 +7,8 @@ export const useLabSection = () => {
    const [rateLimitError, setRateLimitError] = useState(null);
    const [validationError, setValidationError] = useState(null);
 
+   const [fileName, setFileName] = useState('');
+
    const [config, setConfig] = useState({
       beta: 1.0,
       epsMin: 0.1,
@@ -17,6 +19,8 @@ export const useLabSection = () => {
    });
 
    const handleRunAnalysis = async (file) => {
+      setFileName(file.name);
+
       setRateLimitError(null);
       setValidationError(null);
 
@@ -110,6 +114,7 @@ export const useLabSection = () => {
       setProgress(0);
       setRateLimitError(null);
       setValidationError(null);
+      setFileName('');
    };
 
    return {
@@ -124,5 +129,6 @@ export const useLabSection = () => {
       setValidationError,
       handleRunAnalysis,
       resetAnalysis,
+      fileName,
    };
 };

@@ -70,7 +70,8 @@ async def optimize_glow_curve(
         text_content = content.decode('utf-8')
 
         result = process_optimization(
-            text_content,
+            file_content=text_content,
+            file_name=file.filename,
             beta=beta,
             eps_min=eps_min,
             eps_max=eps_max,

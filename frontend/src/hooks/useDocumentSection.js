@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
-export const useDocumentSection = (resultsData) => {
+export const useDocumentSection = (resultsData, fileName) => {
    const reportRef = useRef(null);
    const [isGenerating, setIsGenerating] = useState(false);
 
@@ -68,7 +68,14 @@ export const useDocumentSection = (resultsData) => {
          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
          const dateString = new Date().toISOString().split('T')[0];
-         pdf.save(`Protocol_${dateString}_${reportId}.pdf`);
+
+         const baseName = fileName
+            ? fileName.split('.').slice(0, -1).join('.')
+            : resultsData?.file_name
+              ? resultsData.file_name.split('.').slice(0, -1).join('.')
+              : 'Report';
+
+         pdf.save(`Protocol_${baseName}_${dateString}_${reportId}.pdf`);
       } catch (error) {
          console.error('Помилка при генерації PDF:', error);
       } finally {

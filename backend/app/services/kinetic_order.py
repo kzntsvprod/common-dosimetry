@@ -206,6 +206,7 @@ def parse_and_clean_data(file_content: str, sigma: float = 2.0):
 # Запуск програми
 def process_optimization(
         file_content: str,
+        file_name: str,
         beta: float = 1.0,
         eps_min: float = 0.1,
         eps_max: float = 2.0,
@@ -248,6 +249,7 @@ def process_optimization(
     peak_idx = int(np.argmax(best_curve))
 
     return {
+        "file_name": file_name,
         "parameters": {
             "s": float(best_s),
             "k1_effective": float(best_k1_effective),

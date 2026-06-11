@@ -2,7 +2,7 @@ import { CheckCircle2, Download } from 'lucide-react';
 import DocumentSection from '../sections/documentSection.jsx';
 import { useResultsBoard } from '../hooks/useResultsBoard.js';
 
-const ResultsBoard = ({ onReset, resultsData }) => {
+const ResultsBoard = ({ onReset, resultsData, fileName }) => {
    const { showReport, params, metrics, openReport, closeReport } =
       useResultsBoard(resultsData);
 
@@ -100,7 +100,11 @@ const ResultsBoard = ({ onReset, resultsData }) => {
             </div>
          </div>
          {showReport && (
-            <DocumentSection onClose={closeReport} resultsData={resultsData} />
+            <DocumentSection
+               onClose={closeReport}
+               resultsData={resultsData}
+               fileName={fileName}
+            />
          )}
       </>
    );

@@ -24,6 +24,7 @@ class ChartData(BaseModel):
     theoretical_intensity: List[float]
 
 class OptimizationResponse(BaseModel):
+    file_name: str
     parameters: OptimizationParameters
     metrics: OptimizationMetrics
     peak: PeakInfo
